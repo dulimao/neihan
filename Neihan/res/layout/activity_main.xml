@@ -17,7 +17,7 @@
 	    android:layout_height="50dp"
 	    android:orientation="horizontal"
 	    android:gravity="center"
-	    android:background="#c0c0c0"
+	  
 	    >
 	    <RadioButton 
 	        android:id="@+id/main_tab_item_text"
