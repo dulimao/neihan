@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+       <TextView
+           android:id="@+id/textlist_title"
+           android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#c1bbaa"
+        
+        android:text="@string/main_tab_item_text" />
+
+       <FrameLayout 
+           android:layout_width="match_parent"
+           android:layout_height="0dp"
+           android:layout_weight="1">
+           
+           <!-- 段子内容 -->
+           
+            <com.handmark.pulltorefresh.library.PullToRefreshListView
+           android:id="@+id/textlist_listview"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+        
+         >
+        
+    </com.handmark.pulltorefresh.library.PullToRefreshListView>
+           
+         <!--  <ListView 
+               
+               android:id="@+id/textlist_listview"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               >
+               
+           </ListView>
+            --> 
+           
+           <!-- 快速工具条 -->
+           <include 
+                  android:id="@+id/textlist_quick_tools"
+               layout="@layout/textlist_header"/>
+          
+
+           <!-- 新消息提示条 -->
+           <TextView 
+               android:id="@+id/textlist_new_notifiy"
+               android:layout_width="match_parent"
+               android:layout_height="40dp"
+               android:background="#7745bef7"
+               android:gravity="center"
+               android:textColor="#fff"
+               android:text="20条新信息"/>
+       </FrameLayout>
+</LinearLayout>
