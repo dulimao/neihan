@@ -1,11 +1,12 @@
 package com.dlm.neihan.fragment;
 
-import java.util.LinkedList;
+import java.util.Currency;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -14,9 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.DateSorter;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -24,7 +27,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 import com.dlm.neihan.R;
+import com.dlm.neihan.activity.EssayDetailActivity;
 import com.dlm.neihan.adapter.EssayAdapter;
+import com.dlm.neihan.bean.DataStore;
 import com.dlm.neihan.bean.EntityList;
 import com.dlm.neihan.bean.TextEntity;
 import com.dlm.neihan.client.ClientAPI;
@@ -41,7 +46,7 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
  * 
  */
 public class TextListFragment extends Fragment implements OnClickListener,
-		OnScrollListener, OnRefreshListener2<ListView> {
+		OnScrollListener, OnRefreshListener2<ListView>, OnItemClickListener {
 
 	private Handler hander = new Handler() {
 		public void handleMessage(android.os.Message msg) {
@@ -73,7 +78,7 @@ public class TextListFragment extends Fragment implements OnClickListener,
 	private View quickTools;
 	private TextView textNotifiy;
 	private EssayAdapter adapter;
-	private List<TextEntity> entities;
+//	private List<TextEntity> entities;
 
 	// 1 ---text 文本
 	public static final int CATEGORY_TEXT = 1;
@@ -95,14 +100,24 @@ public class TextListFragment extends Fragment implements OnClickListener,
 	public void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		if(queue==null){
 		queue = Volley.newRequestQueue(getActivity());
-
+		}
+		if(savedInstanceState != null){
+			lastTime = savedInstanceState.getLong("lastTime");
+			Log.d("TextListFragment", "Reload state: lastTime: " + lastTime);
+		}
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-
+		
+		
+		if(savedInstanceState!=null){
+			lastTime = savedInstanceState.getLong("lastTime");
+			Log.i("TextListFragment:", lastTime+"");
+		}
 		View view = inflater.inflate(R.layout.fragment_textlist, container,
 				false);
 		// 获取标题控件，加点击事件，新消息悬浮框显示的功能
@@ -122,6 +137,7 @@ public class TextListFragment extends Fragment implements OnClickListener,
 
 		ListView listView = refreshListView.getRefreshableView();
 
+		
 		// List<String> strings = new LinkedList<String>();
 		// for (int i = 0; i < 60; i++) {
 		// strings.add("内涵段子来了");
@@ -132,21 +148,48 @@ public class TextListFragment extends Fragment implements OnClickListener,
 
 		View quickPublish = header.findViewById(R.id.quick_tools_publish);
 		quickPublish.setOnClickListener(this);
-
+		quickPublish.setFocusable(false);
 		View quickReview = header.findViewById(R.id.quick_tools_review);
 		quickReview.setOnClickListener(this);
-		//
-		// ArrayAdapter<String> adapter = new
-		// ArrayAdapter<String>(getActivity(),
-		// android.R.layout.simple_list_item_1, strings);
-
-		entities = new LinkedList<TextEntity>();
+		quickReview.setFocusable(false);
+		//此句作用：当滑到其他fagment,在回到本fragment时不用重新加载数据
+		List<TextEntity> entities = DataStore.getInstance().getTextEntities();
+//		if(entities==null){
+//			entities = new LinkedList<TextEntity>();
+//		}
+		
 		adapter = new EssayAdapter(getActivity(), entities);
 
+		adapter.setListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if(v instanceof TextView){
+					String string = (String)v.getTag();
+					
+					if(string != null){
+						
+						int position = Integer.parseInt(string);
+						
+					
+						
+						
+						Intent intent = new Intent(getActivity(), EssayDetailActivity.class);
+						
+						intent.putExtra("currentEssayPosition", position);
+						
+						intent.putExtra("category", requestCategory);
+						
+						startActivity(intent);
+					}
+					
+				}
+			}
+		});
 		listView.setAdapter(adapter);
 
 		listView.setOnScrollListener(this);
-
+		listView.setOnItemClickListener(this);
 		// TODO获取快速的工具条（发布和审核，用于列表滚动的显示和影藏
 
 		quickTools = view.findViewById(R.id.textlist_quick_tools);
@@ -163,6 +206,13 @@ public class TextListFragment extends Fragment implements OnClickListener,
 		textNotifiy = (TextView) view.findViewById(R.id.textlist_new_notifiy);
 		textNotifiy.setVisibility(View.INVISIBLE);
 		return view;
+	}
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+		Log.d("TextListFragment", "Save state: lastTime: " + lastTime);
+		outState.putLong("lastTime", lastTime);
 	}
 
 	@Override
@@ -181,12 +231,17 @@ public class TextListFragment extends Fragment implements OnClickListener,
 	public void onDestroyView() {
 		// TODO Auto-generated method stub
 		super.onDestroyView();
+		this.adapter = null;
+		this.header = null;
+		this.quickTools = null;
+		this.textNotifiy = null;
 	}
 
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +348,9 @@ public class TextListFragment extends Fragment implements OnClickListener,
 			if(ets!=null){
 				if(!ets.isEmpty()){
 					//把ets中的内容按照迭代器的顺序添加，
-					entities.addAll(0,ets);
+					DataStore.getInstance().addEntities(ets);
+					
+					//entities.addAll(0,ets);
 					
 					//把object添加到指定的location位置，原有的内容向后移动
 					
@@ -321,5 +378,22 @@ public class TextListFragment extends Fragment implements OnClickListener,
 
 	}
 	// /////////////////////////////////////////////////////////////////////////////////////
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		// TODO Auto-generated method stub
+		arg2--;
+//		DataStore store = DataStore.getInstance();
+//		List<TextEntity> entities = store.getTextEntities();
+//		TextEntity entity = entities.get(arg2);
+		Intent intent = new Intent(getActivity(), EssayDetailActivity.class);
+		
+		intent.putExtra("currentEssayPosition", arg2);
+		
+		intent.putExtra("category", requestCategory);
+		
+		startActivity(intent);
+		
+	}
 
 }

@@ -1,5 +1,7 @@
 package com.dlm.neihan.bean;
 
+import java.io.Serializable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -9,8 +11,12 @@ import org.json.JSONObject;
  * @author dlm
  * 
  */
-public class TextEntity {
+public class TextEntity implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6679916816814320077L;
 	private int type;
 	private long createTime;
 	private long onlineTime;// 上线时间

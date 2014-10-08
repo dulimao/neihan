@@ -1,5 +1,7 @@
 package com.dlm.neihan.bean;
 
+import java.io.Serializable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,7 +10,11 @@ import org.json.JSONObject;
 //"name": "请叫我梓安哥",
 //"user_verified": false
 //},
-public class UserEntity {
+public class UserEntity implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8352282423507975604L;
 	private String avatarUrl;//头像网址
 	private long uerId;//用户ID；
 	private String name;//昵称

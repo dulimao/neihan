@@ -10,7 +10,9 @@ import android.media.Image;
 import android.provider.Telephony.Sms.Conversations;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
@@ -25,8 +27,14 @@ import com.dlm.neihan.bean.UserEntity;
 public class EssayAdapter extends BaseAdapter {
 	private Context context;
 	private List<TextEntity> entities;
-	private LayoutInflater inflater;
 
+
+	private LayoutInflater inflater;
+private OnClickListener listener;
+
+public void setListener(OnClickListener listener) {
+	this.listener = listener;
+}
 	public EssayAdapter(Context context, List<TextEntity> entities) {
 		// TODO Auto-generated constructor stub
 		this.context = context;
